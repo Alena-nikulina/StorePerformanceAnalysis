@@ -62,7 +62,7 @@ st.dataframe(
 st.subheader("Ключевые показатели")
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    count_orders = len(filtered_df['order_id'])
+    count_orders = len(filtered_df['order_id'].unique())
     st.metric(label="Общее количество заказов", value=count_orders)
 with col2:
     count_uniq_users = len(filtered_df['user_name'].unique())
@@ -78,7 +78,7 @@ with col4:
 st.subheader("Визуализация")
 
 # Столбчатая диаграмма - ТОП-10 товаров по выручке
-top_items = df.groupby('item_name')['total_amount'].sum().sort_values(ascending=False).reset_index()
+top_items = filtered_df.groupby('item_name')['total_amount'].sum().sort_values(ascending=False).reset_index()
 top_10 = top_items.head(10)
 
 fig, ax = plt.subplots()
@@ -90,7 +90,7 @@ ax.bar_label(bars, fmt="{:,.0f} руб.", padding=5, fontsize=8)
 st.pyplot(fig)
 
 # Круговая диаграмма - выручка по категориям товаров
-category_amount = df.groupby('category')['total_amount'].sum().reset_index()
+category_amount = filtered_df.groupby('category')['total_amount'].sum().reset_index()
 category_amount = category_amount.sort_values('total_amount')
 fig, ax = plt.subplots()
 ax.pie(
@@ -104,8 +104,8 @@ ax.set_title("Выручка по категориям товаров", fontsize
 st.pyplot(fig)
 
 # Зависимость количества заказов от дня недели
-df['day_of_week_num'] = df['order_date'].dt.weekday
-df['day_of_week_name'] = df['day_of_week_num'].map(
+filtered_df['day_of_week_num'] = filtered_df['order_date'].dt.weekday
+filtered_df['day_of_week_name'] = filtered_df['day_of_week_num'].map(
     {0: "Понедельник",
      1: "Вторник",
      2: "Среда",
@@ -115,7 +115,7 @@ df['day_of_week_name'] = df['day_of_week_num'].map(
      6: "Воскресенье"}
 )
 df_day_week = (
-    df.groupby(['day_of_week_num', 'day_of_week_name'])['order_id']
+    filtered_df.groupby(['day_of_week_num', 'day_of_week_name'])['order_id']
     .nunique()
     .reset_index()
     .sort_values('day_of_week_num')
